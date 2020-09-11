@@ -13,6 +13,7 @@ class CreateCarTagTable extends Migration
      */
     public function up()
     {
+        // tabella collante tra car e tag
         Schema::create('car_tag', function (Blueprint $table) {
           $table->unsignedBigInteger('car_id');
           $table->foreign('car_id')->references('id')->on('cars');

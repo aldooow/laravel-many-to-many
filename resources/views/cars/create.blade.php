@@ -52,3 +52,5 @@
   <br>
   <input type="submit" name="" value="save">
 </form>
+<br>
+<a href="{{ route('cars.index')}}">go back</a>

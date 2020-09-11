@@ -2,9 +2,13 @@
 
 <h2> {{ $car->manifacturer}} {{ $car->engine }}</h2>
 <div>
-  @foreach ($car->tags as $tag)
-    <span>Type: {{$tag->name}}</span>
-  @endforeach
+  {{-- Controllo !array->isEmpty() --}}
+  @if (!$car->tags->isEmpty())
+    <span>Type:</span>
+    @foreach ($car->tags as $tag)
+       {{$tag->name}}
+    @endforeach
+  @endif
 </div>
 <ul>
   <li>Year: {{ $car->year }}</li>

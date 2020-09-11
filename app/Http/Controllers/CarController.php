@@ -16,7 +16,12 @@ class CarController extends Controller
      */
     public function index()
     {
-      $cars = Car::all();
+      // metodo statico ::all() prende tutti gli elemnti della tabella
+      // $cars = Car::all();
+
+      // L'ordine della tabella inverso:
+      // L'ultimo inserito sarà visualizzato come il primo della lista
+      $cars = Car::orderBy('created_at', 'desc')->get();
 
       // dd($cars);
       return view('cars.index', compact('cars'));
@@ -74,7 +79,7 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-      // dd($car->tags);
+      // dd($car);
       return view('cars.show', compact('car'));
     }
 
@@ -84,9 +89,15 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Car $car)
     {
-        //
+        // Per leggere all'interno della pagina edit modelli
+        // Tag e User (entrambi rappresentano un array),
+        // li metto nelle corispettivi variabili e li inserisco nel compact
+        $tags = Tag::all();
+        $users = User::all();
+
+        return view('cars.edit', compact('car', 'tags', 'users'));
     }
 
     /**
@@ -96,9 +107,37 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Car $car)
     {
-        //
+        // Validazione
+        $request->validate($this->validationData());
+
+        $requested_data = $request->all();
+        // dd($requested_data);
+
+        //Versione Estesa del update
+        // $car->manifacturer = $requested_data['manifacturer'];
+        // $car->year = $requested_data['year'];
+        // $car->engine = $requested_data['engine'];
+        // $car->plate = $requested_data['plate'];
+        // $car->user_id = $requested_data['user_id'];
+
+        // Update dei chekboxes
+        if (isset($requested_data['tags'])) {
+          $car->tags()->sync($requested_data['tags']);
+        } else {
+          $car->tags()->detach();
+        }
+
+        // $car->update();
+
+        // Versione Abreviata:
+        $car->update($requested_data);
+
+        $car->save();
+
+        return redirect()->route('cars.show', $car);
+
     }
 
     /**
@@ -107,15 +146,25 @@ class CarController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Car $car)
     {
-        //
+
+        /*
+        Per eliminare un auto (car) che ha una realzione many-to-many con Tags
+          1.distaccare tags associati all'auto (tabella pivot)
+          2.procedere all'elimanzaione dell'auto stessa (car)
+        */
+        $car->tags()->detach();
+
+        $car->delete();
+
+        return redirect()->route('cars.index');
     }
 
     public function validationData() {
       return [
         'manifacturer' => 'required|max:255',
-        'year' => 'required|integer|min:1990|max:2020',
+        'year' => 'required|integer|min:1960|max:2020',
         'engine' => 'required|max:255',
         'plate' => 'required|max:255',
         'user_id' => 'required|integer',
