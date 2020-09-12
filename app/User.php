@@ -37,6 +37,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    // Relazione One(User) to many(Car)
     public function cars()
     {
       return $this->hasMany('App\Car');
